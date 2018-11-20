@@ -12,6 +12,9 @@ import {
   View,
 } from 'react-native';
 
+import StoreFactory from '../services/Storage/StoreFactory';
+import Messages from '../services/Messages/Message';
+
 export default class SettingsScreen extends React.Component {
   static navigationOptions = {
     title: 'app.json',
@@ -19,19 +22,28 @@ export default class SettingsScreen extends React.Component {
 
   constructor(props) {
     super(props);
-
-    this.initialiseSettings();
+    this.initialise();
+    this.loadConfiguration();
   }
 
   /** Load initial configuration values */
-  initialiseSettings(){
+  initialise(){
+    this.store = StoreFactory.getStore('configuration');
     this.state = { text: '', password: '' };
-    // override with settings from storage storage <==> state
-    // so we can just swap state/config/and visa verca
+  }
+
+  async loadConfiguration(){
+    this.setState({
+      username: await this.store.getItem('en-username') || 'un',
+      password: await this.store.getItem('en-password') || 'pw'
+    });
   }
 
   saveConfiguration(){
-    console.log("Save: ", Object.keys(this.state).join('/'));
+    this.store.setItem('en-username', this.state.username);
+    this.store.setItem('en-password', this.state.password);
+
+    Messages.textMessage("Saved settings");
   }
 
   render() {
@@ -42,9 +54,10 @@ export default class SettingsScreen extends React.Component {
       <Text>Easynews Username</Text>
       <TextInput
         placeholder='username'
-        value={this.state.text}
-        onChangeText={(text) => this.setState({text})}
+        value={this.state.username}
+        onChangeText={(username) => this.setState({username})}
       />
+
       <Text>Easynews Password</Text>
       <TextInput
         placeholder='password'
