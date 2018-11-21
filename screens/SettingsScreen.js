@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 
-import StoreFactory from '../services/Storage/StoreFactory';
+import { StoreFactory } from '../services/Storage/StoreFactory';
 import Messages from '../services/Messages/Message';
 
 export default class SettingsScreen extends React.Component {
