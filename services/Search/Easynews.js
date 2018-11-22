@@ -1,6 +1,7 @@
-const R = require('ramda');
-const Utils = require('../Utils');
-const fieldMap = require('./fields');
+import  * as R  from 'ramda';
+import { Utils }  from '../Utils';
+import fieldMap  from './fields';
+import base64 from 'react-native-base64'
 
 class Result {
 
@@ -30,6 +31,13 @@ export default class Easynews {
         return url.replace('http://',`http://${this._username}:${this._password}@`);
     }
 
+    set username(username){
+        this._username = username;
+    }
+    set password(password){
+        this._password = password;
+    }
+    
     // http://members.easynews.com/2.0/search/solr-search/?fly=2&gps=haven&SelectOther=ARCHIVE&safeO=1&sb=1&pno=1&chxu=1&pby=50&u=1&chxgx=1&st=basic&s1=dtime&s1d=-&sS=3&vv=1&fty[]=VIDEO
     // http://members.easynews.com/2.0/index/advanced?st=adv&safeO=1&sb=1&gps=keywords&sbj=subject&from=&ns=&fil=&fex=&vc=&ac=&s1=nsubject&s1d=%2B&s2=nrfile&s2d=%2B&s3=dsize&s3d=%2B&u=1&sc=1&pby=200&pno=1&sS=0&d1=&d1t=&d2=&d2t=&b1=&b1t=4&b2=&b2t=6&px1=&px1t=&px2=&px2t=&fps1=&fps1t=&fps2=&fps2t=&bps1=&bps1t=&bps2=&bps2t=&hz1=&hz1t=&hz2=&hz2t=&rn1=&rn1t=&rn2=&rn2t=&go=Search
 
@@ -51,34 +59,18 @@ export default class Easynews {
         url += `&sc=${collapseSets}`;
         url += types.map(type => `&fty[]=${type}`);
 
-        // url += 'fly=2';
-        // url += '&SelectOther=ARCHIVE';
-        // url += '&safeO=1';
-        // url += '&sb=1';
-        // url += '&pno=1';
-        // url += '&chxu=1';
-        // url += '&pby=50';
-        // url += '&u=1';
-        // url += '&chxgx=1';
-        // url += '&s1=dtime';
-        // url += '&s1d=-';
-        // url += '&sS=3';
-        // url += '&vv=1';
-        // url += '&fty[]=VIDEO';
-
-        console.log(url);
-        return this.addAuthenticationToUrl(url);
+        return url; 
     }
-
-    // renameKeys(keysMap, obj) {
-    //     return R.curry((keysMap, obj) => R.reduce((acc, key) => R.assoc(keysMap[key] || key, obj[key], acc), {}, R.keys(obj)));
-    // }
-                    // {"0":"99026715861540adf6aa60bd09667b680afbbad4f"
+ 
     search(searchText){
         const url = this.buildSearchURL(searchText);
-        return fetch(url)
+        var headers = new Headers();
+        headers.append("Authorization", "Basic " + base64.encode(`${this._username}:${this._password}`));
+
+        return fetch(url, {headers})
             .then(res => res.json())
-            .then(results => this.createResults(results));
+            .then(results => this.createResults(results))
+
     }
 
     createResults(results){

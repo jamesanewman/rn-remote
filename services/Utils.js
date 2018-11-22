@@ -21,4 +21,4 @@ function createFieldRenamer(fieldMap = {}){
 
 let convert = { mb2Byte: bytes => MB * bytes };
 
-module.exports = { createFieldRenamer, renameFields, convert };
+export const Utils = { createFieldRenamer, renameFields, convert };

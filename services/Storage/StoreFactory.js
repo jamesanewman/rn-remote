@@ -1,5 +1,4 @@
 import Store from './Store';
-console.log("SF/Store -> ", Store);
 
 const stores = {};
 export const StoreFactory = {
