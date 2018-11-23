@@ -4,8 +4,9 @@ import {StoreFactory} from '../services/Storage/StoreFactory';
 import Messages from '../services/Messages/Message';
 import { Utils } from '../services/Utils';
 import LoadIndicator from '../components/LoadIndicator';
+import DisplayItems from '../components/Search/DisplayItems';
 
-// TODO: Cleanup when easynews username/password is set
+// TODO: Cleanup when easynews username/password is set - componentDidMounted?
 import {
     StyleSheet,
     Text,
@@ -31,6 +32,7 @@ export default class SearchScreen extends React.Component {
         this.state = {
           searchText: '',
           searchInProgress: false,
+          results: []
         };
 
         this.store = StoreFactory.getStore('configuration');
@@ -40,21 +42,34 @@ export default class SearchScreen extends React.Component {
 
     async search(){
         // To do make state include opts : {}
-        console.log("Searching in progress...");
+        var searchText = this.state.searchText;
+        if(searchText === '') {
+          Messages.textMessage("No Search Text Specified");
+          return;
+        }
+        console.log("Searching in progress... ", searchText);
         await this.setEasynewsDetails();
         this.setState(previous => ({searchInProgress: true}));
-        const searchOpts = {keywords: 'haven', minSize: Utils.convert.mb2Byte(300)};
+        const searchOpts = {keywords: searchText, minSize: Utils.convert.mb2Byte(300)};
         const records = this.easynews.search(searchOpts);
         records
           .then(results => {
+            // Simple debug
             console.log("Search Opts -> " + JSON.stringify(searchOpts) + " -> ", results.length);
             return results;
           })
+          .then(results => {
+            // save results
+            this.setState({results});
+            return results;
+          })
           .catch(err => {
+            // error - probably loading data
             Messages.textMessage("Search failed: " + err.toString());
             return false;
           })
           .finally(() => {
+            // search completed
             this.setState({searchInProgress: false});
           });
     }
@@ -80,6 +95,11 @@ export default class SearchScreen extends React.Component {
       /* Go ahead and delete ExpoConfigView and replace it with your
        * content, we just wanted to give you a quick view of your config */
       const animating = this.state.searchInProgress;
+      let resultText = '';
+      if(this.state.results.length > 0){
+        resultText = `Showing ${this.state.results.length} results`;
+      }
+
       return (
       <View style={styles.welcomeContainer}>
 
@@ -99,6 +119,10 @@ export default class SearchScreen extends React.Component {
           color="#841584"
         />
 
+        <View>
+          <Text>{resultText}</Text>
+          <DisplayItems data={this.state.results} />
+        </View>
       </View>
       );
     }

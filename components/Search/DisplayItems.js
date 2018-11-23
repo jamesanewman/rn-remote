@@ -1,11 +1,15 @@
 import React from 'react';
 import DisplayItem from './DisplayItem';
+import {
+  View,
+  FlatList
+} from 'react-native';
 
 export default class MultiSelectList extends React.PureComponent {
-    state = {selected: (new Map(): Map<string, boolean>)};
+    //state = {selected: (new Map(): Map<string, boolean>)};
   
     _keyExtractor(item, index){
-        return 4;   
+        return '' + index;   
     }
   
     _onPressItem(id){
@@ -13,22 +17,34 @@ export default class MultiSelectList extends React.PureComponent {
     }
   
     _renderItem(item){
-      <DisplayItem
-        id='1'
-        onPressItem={this._onPressItem}
-        selected='false'
-        title='wow'
-      />
+      console.log("Render item = ", item);
+      return (
+        <DisplayItem
+          id={JSON.stringify(item)}
+          onPressItem={this._onPressItem}
+          selected='false'
+          title='wow'
+          position={item.index}
+          description={item.item.description}
+          duration={item.item.duration}
+          size={item.item.size}
+          thumb={item.item.thumbUrl}
+          url={item.item.url}
+          filename={item.item.filename}
+        />
+      );
     };
   
     render() {
+      console.log("Render -> ", this.props.data);
       return (
-        <FlatList
-          data={this.props.data}
-          extraData={this.state}
-          keyExtractor={this._keyExtractor}
-          renderItem={this._renderItem}
-        />
+        <View>
+          <FlatList
+            data={this.props.data}
+            keyExtractor={this._keyExtractor}
+            renderItem={this._renderItem}
+          />
+        </View>
       );
     }
   }

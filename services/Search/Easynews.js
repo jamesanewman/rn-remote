@@ -68,22 +68,34 @@ export default class Easynews {
         headers.append("Authorization", "Basic " + base64.encode(`${this._username}:${this._password}`));
 
         return fetch(url, {headers})
-            .then(res => res.json())
+            .then(res => res.json())            
+            //.then(res => {console.log(res,null, '  '); return res})
             .then(results => this.createResults(results))
+            .then(results => this.cleanDescription(results))
 
     }
 
+    cleanDescription(results){
+        return R.map(
+            record => {
+                record.description = record.description
+                    .replace(/(\[|\()\d+\/\d+(\[|\()/ig,'')
+                    .replace(/&[^;]+?;/g, '')
+                return record;
+            },
+            results
+        );
+    }
     createResults(results){
         let metadata = R.omit(['data'], results);
         let records = R.map(this.renameFields.bind(this), results.data);
         let parsedResults = R.map(record => { record.metadata = metadata; return record}, records);
-
         return R.map(this.buildResultInstance.bind(this), parsedResults);
     }
 
     buildResultInstance(record){
         //console.log(record)
-        let result = R.pick(['description', 'duration', 'size'], record);
+        let result = R.pick(['description', 'duration', 'size', 'filename'], record);
         result.url = this.buildDownloadUrl(record);
         result.thumbUrl = this.buildThumbUrl(record);
         result.description = record.description;
