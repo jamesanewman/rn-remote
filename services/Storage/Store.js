@@ -3,7 +3,7 @@
 // Store search options not results
 import { AsyncStorage } from "react-native";
 
-module.exports = class Store {
+export default class Store {
     constructor(prefix = 'global-store'){
         this.prefix = prefix;
     }
