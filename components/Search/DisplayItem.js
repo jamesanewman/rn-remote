@@ -1,4 +1,7 @@
 import React from 'react';
+import Kodi from '../../services/Player/Kodi';
+
+console.log("Kodi -> ", Kodi);
 import {
   View,
   StyleSheet,
