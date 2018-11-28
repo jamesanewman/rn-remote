@@ -4,8 +4,6 @@ module.exports = class Kodi {
     constructor(host, port){
         this.host = host;
         this.port = port;
-
-        fetch('http://localhost:8080/')        
     }
 
     sendRequest(params){

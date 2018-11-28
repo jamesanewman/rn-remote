@@ -5,23 +5,23 @@ import {
   FlatList
 } from 'react-native';
 
-export default class MultiSelectList extends React.PureComponent {
+export default class DisplayItems extends React.PureComponent {
     //state = {selected: (new Map(): Map<string, boolean>)};
   
     _keyExtractor(item, index){
         return '' + index;   
     }
   
-    _onPressItem(id){
-        console.log("Pressing ... xxx");
+    _onPressItem(url){
+      this.props.player.playVideo(url);
+
     }
   
     _renderItem(item){
-      console.log("Render item = ", item);
       return (
         <DisplayItem
           id={JSON.stringify(item)}
-          onPressItem={this._onPressItem}
+          onPressItem={this._onPressItem.bind(this)}
           selected='false'
           title='wow'
           position={item.index}
@@ -33,16 +33,16 @@ export default class MultiSelectList extends React.PureComponent {
           filename={item.item.filename}
         />
       );
-    };
+    }
   
     render() {
-      console.log("Render -> ", this.props.data);
+      // console.log("Render -> ", this.props.data);
       return (
         <View>
           <FlatList
             data={this.props.data}
             keyExtractor={this._keyExtractor}
-            renderItem={this._renderItem}
+            renderItem={this._renderItem.bind(this)}
           />
         </View>
       );
