@@ -15,6 +15,11 @@ import {
 import { StoreFactory } from '../services/Storage/StoreFactory';
 import Messages from '../services/Messages/Message';
 
+/**
+ * TODO:
+ * - On clicking save, remove keyboard
+ */
+
 export default class SettingsScreen extends React.Component {
   static navigationOptions = {
     title: 'app.json',
@@ -29,19 +34,23 @@ export default class SettingsScreen extends React.Component {
   /** Load initial configuration values */
   initialise(){
     this.store = StoreFactory.getStore('configuration');
-    this.state = { text: '', password: '' };
+    this.state = { username: '', password: '',  kodiip: ''};
   }
 
   async loadConfiguration(){
     this.setState({
       username: await this.store.getItem('en-username') || 'un',
-      password: await this.store.getItem('en-password') || 'pw'
+      password: await this.store.getItem('en-password') || 'pw',
+      kodiip: await this.store.getItem('kodi-ip') || '',
+      kodiport: await this.store.getItem('kodi-port') || ''
     });
   }
 
   saveConfiguration(){
     this.store.setItem('en-username', this.state.username);
     this.store.setItem('en-password', this.state.password);
+    this.store.setItem('kodi-ip', this.state.kodiip);
+    this.store.setItem('kodi-port', this.state.kodiport);
 
     Messages.textMessage("Saved settings");
   }
@@ -63,6 +72,20 @@ export default class SettingsScreen extends React.Component {
         placeholder='password'
         value={this.state.password}
         onChangeText={(password) => this.setState({password})}
+      />
+
+      <Text>Kodi IP Address</Text>
+      <TextInput
+        placeholder='IP Address '
+        value={this.state.kodiip}
+        onChangeText={(kodiip) => this.setState({kodiip})}
+      />
+
+      <Text>Kodi Port</Text>
+      <TextInput
+        placeholder='IP Address '
+        value={this.state.kodiport}
+        onChangeText={(kodiport) => this.setState({kodiport})}
       />
 
       <Button
