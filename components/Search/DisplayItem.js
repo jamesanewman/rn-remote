@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   View,
   StyleSheet,
@@ -7,14 +8,15 @@ import {
   Image
 } from 'react-native';
 
-export default class extends React.PureComponent {
-    _onPress = () => {
-        console.log("Pressing")
-      };
+export default class DisplayItem extends React.PureComponent {
+    _onPress(){
+        // Call the parent
+        this.props.onPressItem(this.props.url);
+    }
 
     render() {
         return (
-          <TouchableOpacity onPress={this._onPress}>
+          <TouchableOpacity onPress={this._onPress.bind(this)}>
             <View style={styles.container}>
               <View style={{ margin: 10}}>
                 <Text>{this.props.position + 1}</Text>

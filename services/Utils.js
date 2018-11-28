@@ -1,4 +1,4 @@
-const R = require('ramda');
+import * as R from 'ramda';
 let utils = {};
 
 const B = 1;

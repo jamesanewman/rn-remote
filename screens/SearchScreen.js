@@ -5,8 +5,11 @@ import Messages from '../services/Messages/Message';
 import { Utils } from '../services/Utils';
 import LoadIndicator from '../components/LoadIndicator';
 import DisplayItems from '../components/Search/DisplayItems';
+import Player from '../services/Player/Player';
 
 // TODO: Cleanup when easynews username/password is set - componentDidMounted?
+// TODO: Done auto searches
+// 
 import {
     StyleSheet,
     Text,
@@ -36,8 +39,12 @@ export default class SearchScreen extends React.Component {
         };
 
         this.store = StoreFactory.getStore('configuration');
-        const {un, pw} = this.getAuthenticationDetails();
+        // Create Easynews instance
+        const {un, pw} = await this.getAuthenticationDetails();
         this.easynews = new Easynews(un, pw);
+        // Create Kodi instance to push down to components
+        const {ip, port} = await this.getPlayerLocation();
+        this.player = new Player(ip, port);
     }
 
     async search(){
@@ -71,6 +78,7 @@ export default class SearchScreen extends React.Component {
           .finally(() => {
             // search completed
             this.setState({searchInProgress: false});
+            console.log("Search complete");
           });
     }
 
@@ -79,11 +87,21 @@ export default class SearchScreen extends React.Component {
       const pw = await this.store.getItem('en-password');
 
       if(!un || !pw){
-          Messages.textMessage("Username and password not found.");
+          Messages.textMessage("Username and password not found for easynews please check your settings.");
       }
       return {un, pw};
     }
 
+
+    async getPlayerLocation(){
+      const port = await this.store.getItem('kodi-port');
+      const ip = await this.store.getItem('kodi-ip');
+
+      if(!port || !ip){
+          Messages.textMessage("Ip and port not found for Kodi please check your settings.");
+      }
+      return {ip, port};
+    }
 
     async setEasynewsDetails(){
       const {un, pw} = await this.getAuthenticationDetails();
@@ -99,7 +117,6 @@ export default class SearchScreen extends React.Component {
       if(this.state.results.length > 0){
         resultText = `Showing ${this.state.results.length} results`;
       }
-
       return (
       <View style={styles.welcomeContainer}>
 
@@ -121,7 +138,7 @@ export default class SearchScreen extends React.Component {
 
         <View>
           <Text>{resultText}</Text>
-          <DisplayItems data={this.state.results} />
+          <DisplayItems data={this.state.results} player={this.player}/>
         </View>
       </View>
       );
