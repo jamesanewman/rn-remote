@@ -6,6 +6,7 @@ import { Utils } from '../services/Utils';
 import LoadIndicator from '../components/LoadIndicator';
 import DisplayItems from '../components/Search/DisplayItems';
 import Player from '../services/Player/Player';
+import Panel from '../components/Panel/Panel';
 
 // TODO: Cleanup when easynews username/password is set - componentDidMounted?
 // TODO: Done auto searches
@@ -16,7 +17,9 @@ import {
     TextInput,
     Button,
     ActivityIndicator,
-    View
+    View,
+    Picker,
+    CheckBox
   } from 'react-native';
 
 
@@ -33,9 +36,14 @@ export default class SearchScreen extends React.Component {
     /** Load initial configuration values */
     async initialise(){
         this.state = {
-          searchText: '',
           searchInProgress: false,
-          results: []
+          results: [],
+
+          // Search options
+          searchText: '',
+          minSize: '300',
+          maxSize: '2000',
+          useSubject: true
         };
 
         this.store = StoreFactory.getStore('configuration');
@@ -48,21 +56,20 @@ export default class SearchScreen extends React.Component {
     }
 
     async search(){
+      if(this.state.searchText === '') {
+        Messages.textMessage("No Search Text Specified");
+        return;
+      }
+        const params = this.buildSearchParams();
         // To do make state include opts : {}
-        var searchText = this.state.searchText;
-        if(searchText === '') {
-          Messages.textMessage("No Search Text Specified");
-          return;
-        }
-        console.log("Searching in progress... ", searchText);
+        console.log("Searching in progress... ", JSON.stringify(params));
         await this.setEasynewsDetails();
         this.setState(previous => ({searchInProgress: true}));
-        const searchOpts = {keywords: searchText, minSize: Utils.convert.mb2Byte(300)};
-        const records = this.easynews.search(searchOpts);
+        const records = this.easynews.search(params);
         records
           .then(results => {
             // Simple debug
-            console.log("Search Opts -> " + JSON.stringify(searchOpts) + " -> ", results.length);
+            console.log("Search Opts -> " + JSON.stringify(params) + " -> ", results.length);
             return results;
           })
           .then(results => {
@@ -80,6 +87,17 @@ export default class SearchScreen extends React.Component {
             this.setState({searchInProgress: false});
             console.log("Search complete");
           });
+    }
+
+    buildSearchParams(){
+      var { minSize, maxSize, useSubject, searchText} = this.state;
+      var params = {types: ['VIDEO']};
+      if(minSize && minSize !== '0') params.minSize = Utils.convert.mb2Byte(minSize);
+      if(maxSize && maxSize !== '0') params.maxSize = Utils.convert.mb2Byte(maxSize);
+      if(useSubject === true) params.subject = searchText;
+      else params.keywords = searchText;
+
+      return params;
     }
 
     async getAuthenticationDetails(){
@@ -109,6 +127,9 @@ export default class SearchScreen extends React.Component {
       this.easynews.password = pw;
     }
 
+    changeSubject(useSubject){
+      this.setState({useSubject})
+    }
     render() {
       /* Go ahead and delete ExpoConfigView and replace it with your
        * content, we just wanted to give you a quick view of your config */
@@ -129,7 +150,39 @@ export default class SearchScreen extends React.Component {
           value={this.state.searchText}
           onChangeText={(searchText) => this.setState({searchText})}
         />
-  
+
+        <Panel title="Search Options:">
+
+          <Picker
+            selectedValue={this.state.minSize}
+            //style={{ height: 50, width: 100 }}
+            onValueChange={minSize => this.setState({minSize})}>
+            <Picker.Item label="Any" value="0" />
+            <Picker.Item label="200MB" value="200" />
+            <Picker.Item label="300MB" value="300" />
+            <Picker.Item label="400MB" value="400" />
+            <Picker.Item label="1GB" value="1000" />
+            <Picker.Item label="2GB" value="2000" />
+          </Picker>
+
+          <Picker
+            selectedValue={this.state.maxSize}
+            //style={{ height: 50, width: 100 }}
+            onValueChange={maxSize => this.setState({maxSize})}>
+            <Picker.Item label="Any" value="0" />
+            <Picker.Item label="200MB" value="200" />
+            <Picker.Item label="300MB" value="300" />
+            <Picker.Item label="400MB" value="400" />
+            <Picker.Item label="1GB" value="1000" />
+            <Picker.Item label="2GB" value="2000" />
+          </Picker>
+
+          <Text>
+            Use subject to search: (if not checked then use keywords)
+          </Text>
+          <CheckBox label="Click me" value={this.state.useSubject} onValueChange={this.changeSubject.bind(this)}/>        
+        </Panel>
+
         <Button
           onPress={() => this.search()}
           title="Search"
@@ -153,6 +206,8 @@ export default class SearchScreen extends React.Component {
     },
     searchHeader: {
         fontWeight: 'bold'
+    },
+    options: {
     }
   });
   
