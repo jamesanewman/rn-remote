@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "rn-remote",
+    "name": "Kodi Player",
     "description": "A very interesting project.",
     "slug": "rn-remote",
     "privacy": "public",
@@ -20,8 +20,8 @@
     "assetBundlePatterns": [
       "**/*"
     ],
-    "ios": {
-      "supportsTablet": true
+    "android": {
+      "package": "com.stonehams.KodiPlayer"
     }
   }
 }
